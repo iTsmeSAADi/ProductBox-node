@@ -3,29 +3,61 @@
 
 const http = require('http');
 const url = require('url');
-const { getTitles } = require('./cb');
+// const { getTitles } = require('./cb');
+const { getTitles } = require('./async_cb');
+
 
 // Create the HTTP server.
+// const server = http.createServer((req, res) => {
+//   const parsedUrl = url.parse(req.url, true);
+  
+//   // Check that the method is GET and the pathname is /I/want/title.
+//   if (req.method === 'GET' && parsedUrl.pathname === '/I/want/title') {
+//     // Extract the "address" query parameter(s).
+//     let addresses = parsedUrl.query.address;
+    
+//     // Call our getTitles function from plainCallbacks.js.
+//     getTitles(addresses, (err, html) => {
+//       if (err) {
+//         res.writeHead(500, { 'Content-Type': 'text/plain' });
+//         res.end('Internal Server Error');
+//       } else {
+//         res.writeHead(200, { 'Content-Type': 'text/html' });
+//         res.end(html);
+//       }
+//     });
+//   } else {
+//     // For any other route, return 404.
+//     res.writeHead(404, { 'Content-Type': 'text/plain' });
+//     res.end('404 Not Found');
+//   }
+// });
+
 const server = http.createServer((req, res) => {
   const parsedUrl = url.parse(req.url, true);
   
-  // Check that the method is GET and the pathname is /I/want/title.
+  // Check for GET /I/want/title.
   if (req.method === 'GET' && parsedUrl.pathname === '/I/want/title') {
-    // Extract the "address" query parameter(s).
     let addresses = parsedUrl.query.address;
     
-    // Call our getTitles function from plainCallbacks.js.
+    if (!Array.isArray(addresses)) {
+      addresses = [addresses];
+    }
+    
+    // Call the getTitles function from our asyncCallbacks module.
     getTitles(addresses, (err, html) => {
       if (err) {
+        // On error, send 500.
         res.writeHead(500, { 'Content-Type': 'text/plain' });
         res.end('Internal Server Error');
       } else {
+        // Otherwise, send the HTML.
         res.writeHead(200, { 'Content-Type': 'text/html' });
         res.end(html);
       }
     });
   } else {
-    // For any other route, return 404.
+    // For any other routes, return 404.
     res.writeHead(404, { 'Content-Type': 'text/plain' });
     res.end('404 Not Found');
   }
