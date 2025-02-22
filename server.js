@@ -70,7 +70,7 @@ const server = http.createServer((req, res) => {
   // Check for the correct method and path.
   if (req.method === 'GET' && parsedUrl.pathname === '/I/want/title') {
     let addresses = parsedUrl.query.address;
-    // Ensure addresses is an array.
+    
     if (!Array.isArray(addresses)) {
       addresses = [addresses];
     }
