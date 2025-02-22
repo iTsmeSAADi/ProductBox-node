@@ -34,6 +34,45 @@ function fetchTitle(address, callback) {
   });
 }
 
+// Main function: getTitles
+// Accepts an array of addresses and a callback.
+// The callback will be called with (err, htmlResult)
+function getTitles(addresses, callback) {
+  // Ensure addresses is an array.
+  if (!Array.isArray(addresses)) {
+    addresses = [addresses];
+  }
+  const results = [];
+  let pending = addresses.length;
 
+  addresses.forEach((addr) => {
+    fetchTitle(addr, (err, title) => {
+      // On error, set title to "NO RESPONSE"
+      if (err) {
+        results.push({ address: addr, title: 'NO RESPONSE' });
+      } else {
+        results.push({ address: addr, title: title });
+      }
+      pending--;
+      // When all addresses are processed...
+      if (pending === 0) {
+        // Build the HTML output.
+        let html = `<html>
+  <head></head>
+  <body>
+    <h1>Following are the titles of given websites:</h1>
+    <ul>`;
+        results.forEach((item) => {
+          html += `<li>${item.address} - "${item.title}"</li>`;
+        });
+        html += `</ul>
+  </body>
+</html>`;
+        // Return the final HTML.
+        callback(null, html);
+      }
+    });
+  });
+}
 
 module.exports = { getTitles };
