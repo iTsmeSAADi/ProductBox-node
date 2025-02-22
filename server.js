@@ -5,7 +5,8 @@ const http = require('http');
 const url = require('url');
 // const { getTitles } = require('./cb');
 // const { getTitles } = require('./async_cb');
-const { getTitles } = require('./promise');
+// const { getTitles } = require('./promise');
+const { getTitlesRx } = require('./rxJS_stream');
 
 
 // Create the HTTP server.
@@ -64,30 +65,59 @@ const { getTitles } = require('./promise');
 //   }
 // });
 
+// const server = http.createServer((req, res) => {
+//   const parsedUrl = url.parse(req.url, true);
+
+//   // Check for the correct method and path.
+//   if (req.method === 'GET' && parsedUrl.pathname === '/I/want/title') {
+//     let addresses = parsedUrl.query.address;
+    
+//     if (!Array.isArray(addresses)) {
+//       addresses = [addresses];
+//     }
+
+//     // Call getTitles, which returns a Promise.
+//     getTitles(addresses)
+//       .then((html) => {
+//         res.writeHead(200, { 'Content-Type': 'text/html' });
+//         res.end(html);
+//       })
+//       .catch((err) => {
+//         // Should rarely occur because fetchTitlePromise always resolves.
+//         res.writeHead(500, { 'Content-Type': 'text/plain' });
+//         res.end('Internal Server Error');
+//       });
+//   } else {
+//     // For all other routes, return a 404.
+//     res.writeHead(404, { 'Content-Type': 'text/plain' });
+//     res.end('404 Not Found');
+//   }
+// });
+
 const server = http.createServer((req, res) => {
   const parsedUrl = url.parse(req.url, true);
-
-  // Check for the correct method and path.
+  
+  // Only handle GET requests for /I/want/title.
   if (req.method === 'GET' && parsedUrl.pathname === '/I/want/title') {
     let addresses = parsedUrl.query.address;
-    
+    // Normalize to array if a single address is provided.
     if (!Array.isArray(addresses)) {
       addresses = [addresses];
     }
-
-    // Call getTitles, which returns a Promise.
-    getTitles(addresses)
-      .then((html) => {
+    
+    // Call getTitlesRx, which returns an Observable.
+    getTitlesRx(addresses).subscribe({
+      next: (html) => {
         res.writeHead(200, { 'Content-Type': 'text/html' });
         res.end(html);
-      })
-      .catch((err) => {
-        // Should rarely occur because fetchTitlePromise always resolves.
+      },
+      error: () => {
         res.writeHead(500, { 'Content-Type': 'text/plain' });
         res.end('Internal Server Error');
-      });
+      }
+    });
   } else {
-    // For all other routes, return a 404.
+    // Return 404 for any other routes.
     res.writeHead(404, { 'Content-Type': 'text/plain' });
     res.end('404 Not Found');
   }
