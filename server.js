@@ -1,18 +1,37 @@
-// This version sets up a simple Node.js server using only built-in modules
-// It listens on port 3000 and handles GET requests to /I/want/title
-// For each "address" query parameter, it makes an HTTP/HTTPS request,
-// extracts the <title> tag from the HTML, and builds an HTML response.
+// This file sets up the HTTP server and delegates request handling
+// for GET /I/want/title to the plainCallbacks implementation.
 
-// Import required modules.
 const http = require('http');
+const url = require('url');
+const { getTitles } = require('./cb');
 
-
+// Create the HTTP server.
 const server = http.createServer((req, res) => {
+  const parsedUrl = url.parse(req.url, true);
+  
+  // Check that the method is GET and the pathname is /I/want/title.
+  if (req.method === 'GET' && parsedUrl.pathname === '/I/want/title') {
+    // Extract the "address" query parameter(s).
+    let addresses = parsedUrl.query.address;
+    
+    // Call our getTitles function from plainCallbacks.js.
+    getTitles(addresses, (err, html) => {
+      if (err) {
+        res.writeHead(500, { 'Content-Type': 'text/plain' });
+        res.end('Internal Server Error');
+      } else {
+        res.writeHead(200, { 'Content-Type': 'text/html' });
+        res.end(html);
+      }
+    });
+  } else {
+    // For any other route, return 404.
+    res.writeHead(404, { 'Content-Type': 'text/plain' });
+    res.end('404 Not Found');
+  }
 });
-
-const PORT = require('dotenv').config().parsed.PORT;
 
 // Start the server on port 3000.
 server.listen(3000, () => {
-    console.log('Plain callback server running on port', PORT);
-  });
+  console.log('Server running on port', 3000);
+});
