@@ -6,7 +6,9 @@
 const http = require('http');
 const https = require('https');
 const url = require('url');
-
+// Import required functions/operators from RxJS.
+const { from } = require('rxjs');
+const { mergeMap, toArray } = require('rxjs/operators');
 
 /**
  * Helper function that wraps an HTTP/HTTPS request in a Promise.
@@ -45,4 +47,44 @@ function fetchTitleRx(address) {
   });
 }
 
+/**
+ * Main function that accepts an array (or single string) of addresses.
+ * It converts the array into an Observable, uses mergeMap to process each
+ * address with fetchTitleRx, and finally collects all results into an array.
+ * The final Observable then maps that array into an HTML string.
+ *
+ * @param {string|string[]} addresses - One or more website addresses.
+ * @returns {Observable<string>} An Observable that will emit the final HTML string.
+ */
+function getTitlesRx(addresses) {
+  // Normalize addresses to an array.
+  if (!Array.isArray(addresses)) {
+    addresses = [addresses];
+  }
+  
+  // Create an Observable from the addresses array.
+  return from(addresses).pipe(
+    // For each address, perform the HTTP request via fetchTitleRx.
+    mergeMap((addr) => fetchTitleRx(addr)),
+    // Collect all results into an array.
+    toArray(),
+    // Once all results are in, build the HTML string.
+    mergeMap((results) => {
+      let html = `<html>
+  <head></head>
+  <body>
+    <h1>Following are the titles of given websites:</h1>
+    <ul>`;
+      results.forEach((item) => {
+        html += `<li>${item.address} - "${item.title}"</li>`;
+      });
+      html += `</ul>
+  </body>
+</html>`;
+      // Wrap the final HTML in an Observable.
+      return from(Promise.resolve(html));
+    })
+  );
+}
 
+module.exports = { getTitlesRx };
