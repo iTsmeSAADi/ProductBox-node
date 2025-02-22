@@ -43,6 +43,32 @@ function fetchTitle(addr, callback) {
   });
 }
 
-
+// Main function: getTitles
+// Accepts an array of addresses (or a single string) and a callback function.
+// The callback is called with (error, htmlString) after all titles are processed.
+function getTitles(addresses, callback) {
+  // Ensure addresses is an array.
+  if (!Array.isArray(addresses)) {
+    addresses = [addresses];
+  }
+  
+  // Use async.map to process each address concurrently.
+  async.map(addresses, fetchTitle, (err, results) => {
+    // Build an HTML string with the results.
+    let html = `<html>
+  <head></head>
+  <body>
+    <h1>Following are the titles of given websites:</h1>
+    <ul>`;
+    results.forEach((item) => {
+      html += `<li>${item.address} - "${item.title}"</li>`;
+    });
+    html += `</ul>
+  </body>
+</html>`;
+    // Call the provided callback with the HTML result.
+    callback(null, html);
+  });
+}
 
 module.exports = { getTitles };
