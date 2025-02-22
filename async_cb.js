@@ -43,7 +43,6 @@ function fetchTitle(addr, callback) {
   });
 }
 
-// Main function: getTitles
 // Accepts an array of addresses (or a single string) and a callback function.
 // The callback is called with (error, htmlString) after all titles are processed.
 function getTitles(addresses, callback) {
