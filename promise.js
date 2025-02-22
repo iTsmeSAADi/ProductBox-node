@@ -41,4 +41,32 @@ function fetchTitlePromise(address) {
 }
 
 
+// Main function: getTitles
+// Accepts addresses (either a string or an array) and returns a Promise
+// that resolves with the final HTML string.
+function getTitles(addresses) {
+    // Normalize addresses to an array.
+    if (!Array.isArray(addresses)) {
+      addresses = [addresses];
+    }
+  
+    // Map each address to its corresponding Promise.
+    return Promise.all(addresses.map(fetchTitlePromise))
+      .then((results) => {
+        // Build the HTML response.
+        let html = `<html>
+    <head></head>
+    <body>
+      <h1>Following are the titles of given websites:</h1>
+      <ul>`;
+        results.forEach((item) => {
+          html += `<li>${item.address} - "${item.title}"</li>`;
+        });
+        html += `</ul>
+    </body>
+  </html>`;
+        return html;
+      });
+  }
+
 module.exports = { getTitles };
