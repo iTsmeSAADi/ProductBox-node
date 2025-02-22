@@ -11,6 +11,8 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "async": "^3.2.6",
+    "async.js": "^0.9.5",
     "dotenv": "^16.4.7"
   },
   "devDependencies": {
